@@ -1,0 +1,36 @@
+{
+  "name": "async-waterfall",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "start": "tsnd --respawn src/index.ts",
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "build": "tsc",
+    "format": "prettier --write \"src/**/*.ts\" \"src/**/*.js\"",
+    "lint": "tslint -p tsconfig.json --fix"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/zilberman3k/async-waterfall.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/zilberman3k/async-waterfall/issues"
+  },
+  "homepage": "https://github.com/zilberman3k/async-waterfall#readme",
+  "dependencies": {
+    "typescript": "^3.6.2"
+  },
+  "devDependencies": {
+    "prettier": "^1.18.2",
+    "ts-node-dev": "^1.0.0-pre.42",
+    "tslint": "^5.20.0",
+    "tslint-config-prettier": "^1.18.0"
+  },
+  "files": [
+    "lib/**/*"
+  ]
+}
