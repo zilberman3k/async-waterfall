@@ -1,31 +1,41 @@
 type PromiseResult = any;
 type FunctionParam = (item?: any, index?: number) => PromiseResult;
 type FunctionParamArray = FunctionParam[];
+type FunctionWithArgs = (...args)=>void
 const NOOP = () => {
 	/**/
 };
+
 export enum StepActionEnum {
+	Abort,
 	Next,
 	SkipNext,
-	Abort,
 }
 
 interface IWaterfall {
-	run(fn: FunctionParam, isEach?: boolean): IWaterfall;
+	run(fn: FunctionWithArgs, isEach?: boolean): IWaterfall;
+
 	each(fn: FunctionParam): IWaterfall;
+
 	forEach(fn: FunctionParam): IWaterfall;
 }
 
-interface IStepIteration {
+export interface IStepIteration {
 	prev?: PromiseResult;
 	current: PromiseResult;
 	isFirst: PromiseResult;
 	isLast: PromiseResult;
 }
 
-interface IStepActionIteration {
+interface IActionOperation {
+	next: (...data: any) => void;
+	skipNext: () => void;
+	abort: () => void;
+}
+
+export interface IStepActionIteration {
 	step: PromiseResult;
-	action: (predicate: StepActionEnum) => void;
+	action: IActionOperation;
 }
 
 export class Waterfall implements IWaterfall {
@@ -33,13 +43,15 @@ export class Waterfall implements IWaterfall {
 	public steps: any = {};
 	public stepAction: any = {};
 
+	public forEach = this.each;
+
 	constructor(private promisesFunctions: FunctionParamArray = []) {
 		this.iterator[Symbol.asyncIterator] = this.iteratorFn.bind(this);
 		this.steps[Symbol.asyncIterator] = this.stepsFn.bind(this);
 		this.stepAction[Symbol.asyncIterator] = this.stepActionFn.bind(this);
 	}
 
-	public run(fn: FunctionParam = NOOP, isEach = false): IWaterfall {
+	public run(fn: FunctionWithArgs = NOOP, isEach = false): IWaterfall {
 		const self = this;
 		(async () => {
 			const results: PromiseResult[] = [];
@@ -62,10 +74,10 @@ export class Waterfall implements IWaterfall {
 
 		return this;
 	}
+
 	public each(fn: FunctionParam): IWaterfall {
 		return this.run(fn, true);
 	}
-	public forEach = this.each;
 
 	private iteratorFn = async function*(this: Waterfall): AsyncIterableIterator<Waterfall> {
 		for (const f of this.promisesFunctions) {
@@ -83,23 +95,38 @@ export class Waterfall implements IWaterfall {
 			if (i === 0) {
 				yield { current: res, isFirst, isLast } as IStepIteration;
 			} else {
-				yield { prev: results[i - 1], current: results[i], isFirst, isLast } as IStepIteration;
+				yield {
+					current: results[i],
+					isFirst,
+					isLast,
+					prev: results[i - 1],
+				} as IStepIteration;
 			}
 		}
 		return this;
 	};
-	private stepActionFn = async function*(this: Waterfall): AsyncIterableIterator<Waterfall | IStepActionIteration> {
+	private stepActionFn = async function*(
+		this: Waterfall,
+	): any | AsyncIterableIterator<Waterfall | IStepActionIteration> {
 		const sa = StepActionEnum;
 		let nextStepSkip = false;
+		let nextIterationData: any = null;
 		for (const f of this.promisesFunctions) {
 			if (nextStepSkip) {
 				nextStepSkip = false;
+				nextIterationData = null;
 				continue;
 			}
-			const step = await f();
+			const step = await f(...nextIterationData);
+			nextIterationData = null;
 			let actionResult: StepActionEnum = sa.Next;
-			const action = (predicate: StepActionEnum) => {
-				actionResult = predicate;
+			const action = {
+				abort: () => (actionResult = StepActionEnum.Abort),
+				next: (...data) => {
+					actionResult = StepActionEnum.Next;
+					nextIterationData = data;
+				},
+				skipNext: () => (actionResult = StepActionEnum.SkipNext),
 			};
 
 			yield { step, action };
