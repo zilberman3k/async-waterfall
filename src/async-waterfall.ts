@@ -61,13 +61,11 @@ export class Waterfall implements IWaterfall {
 				results.push(ans);
 
 				if (isEach) {
-					// @ts-ignore
 					fn.call(self, ans, idx++);
 				}
 			}
 
 			if (!isEach) {
-				// @ts-ignore
 				fn.apply(self, results);
 			}
 		})();

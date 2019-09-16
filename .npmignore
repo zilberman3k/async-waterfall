@@ -2,3 +2,5 @@ src
 tsconfig.json
 tslint.json
 .prettierrc
+jest.config.js
+__tests__
