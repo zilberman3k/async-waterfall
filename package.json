@@ -1,16 +1,21 @@
 {
-  "name": "async-waterfall",
+  "name": "for-await-waterfall",
   "version": "1.0.0",
-  "description": "",
-  "main": "index.js",
+  "description": "executes async functions synchronously, with for await loop",
+  "main": "lib/index.js",
+  "types": "lib/index.d.ts",
   "scripts": {
-    "start": "tsnd --respawn src/index.ts",
     "test": "jest --coverage",
     "tdd": "jest --watch",
     "build": "tsc",
     "format": "prettier --write \"src/**/*.ts\" \"src/**/*.js\"",
     "lint": "tslint -c tslint.json -p tsconfig.json",
-    "clear": "rimraf -rf coverage"
+    "clear": "rimraf -rf coverage",
+    "prepare": "npm run build",
+    "prepublishOnly": "npm test && npm run lint",
+    "preversion": "npm run lint",
+    "version": "npm run format && git add -A src",
+    "postversion": "git push && git push --tags"
   },
   "repository": {
     "type": "git",
@@ -21,9 +26,10 @@
     "waterfall",
     "promises",
     "one after the other",
-    "for await waterfall"
+    "for await waterfall",
+    "forEach"
   ],
-  "author": "",
+  "author": "Niv Zilberman",
   "license": "ISC",
   "bugs": {
     "url": "https://github.com/zilberman3k/async-waterfall/issues"
