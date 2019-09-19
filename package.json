@@ -9,7 +9,7 @@
     "tdd": "jest --watch",
     "build": "tsc",
     "format": "prettier --write \"src/**/*.ts\" \"src/**/*.js\"",
-    "lint": "tslint -c tslint.json -p tsconfig.json --fix",
+    "lint": "tslint -c tslint.json -p tsconfig.json",
     "clear": "rimraf -rf coverage"
   },
   "repository": {
