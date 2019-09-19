@@ -1,4 +1,4 @@
-# async-waterfall
+# for-await-waterfall
 
 let async function be of type (args)=>Promise
 let arr be of type [asyncFn1,asyncFn2...]
