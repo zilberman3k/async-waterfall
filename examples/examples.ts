@@ -1,11 +1,11 @@
-// todo : convert to test cases
+
+// this files execute examples of the async waterfall package.
 
 import {Waterfall,IStepActionIteration, IStepIteration} from "../src";
 
-let timerFn = (id, p = 0) => {
+const timerFn = (id, p = 0) => {
     return new Promise(resolve => {
         setTimeout(() => {
-            console.log('Done...');
             resolve(id + p);
         }, 2000);
     });

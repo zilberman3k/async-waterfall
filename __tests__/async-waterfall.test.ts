@@ -1,4 +1,4 @@
-import {IStepIteration, Waterfall} from '../src';
+import {IStepActionIteration, IStepIteration, Waterfall} from '../src';
 
 const asyncFn = (data) => {
     return new Promise(resolve => {
@@ -10,6 +10,7 @@ const asyncFn = (data) => {
 
 const arr = [() => asyncFn(10), () => asyncFn(11), () => asyncFn(12), () => asyncFn(13)];
 describe("test async-waterfall", () => {
+
     it('test instance with no param', () => {
         const w = new Waterfall();
         expect(w.run()).toMatchObject(w);
@@ -57,25 +58,111 @@ describe("test async-waterfall", () => {
         }, 400);
     });
 
-    // todo - complete
-    it('should test iterator function', async (done) => {
+    it('should test iterator function', async () => {
+        const helperArr: any[] = [];
+
         const w = new Waterfall(arr);
         for await (const item of w.iterator) {
-            console.log(item);
+            helperArr.push(item)
         }
 
-        return done();
+        expect(helperArr).toMatchObject([10, 11, 12, 13]);
     });
 
-    // todo - complete
-    it('should test steps iterator', async (done) => {
+    it('should test steps iterator', async () => {
+
+        const cb = jest.fn((i: IStepIteration) => i);
         const w = new Waterfall(arr);
         for await (const item of w.steps) {
-            const {prev, current, isFirst, isLast}: IStepIteration = item;
-            console.log(prev, current, isFirst, isLast);
+            cb(item);
         }
+        const first: IStepIteration = {
+            current: 10, isFirst: true, isLast: false
+        };
+        const last: IStepIteration = {
+            current: 13, isFirst: false, isLast: true, prev: 12
+        };
+
+        expect(cb).toBeCalledTimes(4);
+        expect(cb.mock.results[0].value).toMatchObject(first);
+        expect(cb.mock.results[3].value).toMatchObject(last);
+
+    });
+
+    it('should test stepAction iterator - no action - expect 10 to 13', async (done) => {
+        const w = new Waterfall(arr);
+
+        const cbNormal = jest.fn();
+
+        for await (const item of w.stepAction) {
+            const {step}: IStepActionIteration = item;
+            cbNormal(step);
+        }
+        expect(cbNormal).toHaveBeenNthCalledWith(1, 10);
+        expect(cbNormal).toHaveBeenNthCalledWith(2, 11);
+        expect(cbNormal).toHaveBeenNthCalledWith(3, 12);
+        expect(cbNormal).toHaveBeenNthCalledWith(4, 13);
+        expect(cbNormal).toBeCalledTimes(4);
 
         done();
+    });
+
+    it('should test stepAction iterator - skip action - expect 10,11,13', async () => {
+        const w = new Waterfall(arr);
+        const cbSkip = jest.fn();
+
+        for await (const item of w.stepAction) {
+            const {step, action}: IStepActionIteration = item;
+            cbSkip(step);
+
+            if (step === 11) {
+                action.skipNext();
+            }
+        }
+
+        expect(cbSkip).toHaveBeenNthCalledWith(1, 10);
+        expect(cbSkip).toHaveBeenNthCalledWith(2, 11);
+        expect(cbSkip).toHaveBeenNthCalledWith(3, 13);
+        expect(cbSkip).toBeCalledTimes(3);
+
+    });
+
+    it('should test stepAction abort action - expect 10,11', async () => {
+        const w = new Waterfall(arr);
+        const cbAbort = jest.fn();
+
+        for await (const item of w.stepAction) {
+            const {step, action}: IStepActionIteration = item;
+            cbAbort(step);
+
+            if (step === 11) {
+                action.abort();
+            }
+        }
+
+        expect(cbAbort).toHaveBeenNthCalledWith(1, 10);
+        expect(cbAbort).toHaveBeenNthCalledWith(2, 11);
+        expect(cbAbort).toBeCalledTimes(2);
+
+    });
+
+    it('should test stepAction iterator next action - expect 101,102,103,104', async () => {
+        const arrForNext = [() => asyncFn(100), asyncFn, asyncFn, asyncFn];
+        const wNext = new Waterfall(arrForNext);
+        const cbNext = jest.fn();
+
+        for await (const item of wNext.stepAction) {
+            const {step, action}: IStepActionIteration = item;
+            cbNext(step);
+            action.next(step + 1);
+        }
+
+        expect(cbNext).toHaveBeenNthCalledWith(1, 100);
+        expect(cbNext).toHaveBeenNthCalledWith(2, 101);
+        expect(cbNext).toHaveBeenNthCalledWith(3, 102);
+        expect(cbNext).toHaveBeenNthCalledWith(4, 103);
+        expect(cbNext).toBeCalledTimes(4);
+
     });
 
 });

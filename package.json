@@ -9,13 +9,20 @@
     "tdd": "jest --watch",
     "build": "tsc",
     "format": "prettier --write \"src/**/*.ts\" \"src/**/*.js\"",
-    "lint": "tslint -c tslint.json -p tsconfig.json --fix"
+    "lint": "tslint -c tslint.json -p tsconfig.json --fix",
+    "clear": "rimraf -rf coverage"
   },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/zilberman3k/async-waterfall.git"
   },
-  "keywords": [],
+  "keywords": [
+    "async",
+    "waterfall",
+    "promises",
+    "one after the other",
+    "for await waterfall"
+  ],
   "author": "",
   "license": "ISC",
   "bugs": {
@@ -28,6 +35,7 @@
     "eslint": "^6.4.0",
     "jest": "^24.9.0",
     "prettier": "^1.18.2",
+    "rimraf": "^3.0.0",
     "ts-jest": "^24.1.0",
     "ts-node-dev": "^1.0.0-pre.42",
     "tslint": "^5.20.0",

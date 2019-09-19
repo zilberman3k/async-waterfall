@@ -4,3 +4,5 @@ tslint.json
 .prettierrc
 jest.config.js
 __tests__
+examples
+coverage

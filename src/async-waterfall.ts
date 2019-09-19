@@ -1,7 +1,7 @@
 type PromiseResult = any;
 type FunctionParam = (item?: any, index?: number) => PromiseResult;
 type FunctionParamArray = FunctionParam[];
-type FunctionWithArgs = (...args)=>void
+type FunctionWithArgs = (...args) => void;
 const NOOP = () => {
 	/**/
 };
@@ -83,6 +83,7 @@ export class Waterfall implements IWaterfall {
 		}
 		return this;
 	};
+
 	private stepsFn = async function*(this: Waterfall): AsyncIterableIterator<Waterfall | IStepIteration> {
 		const results: PromiseResult[] = [];
 		for (let i = 0; i < this.promisesFunctions.length; i++) {
