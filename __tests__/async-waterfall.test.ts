@@ -29,31 +29,33 @@ describe("test async-waterfall", () => {
 
     });
 
-    it('test forEach fn, should run 4 times on each iteration', (done) => {
-        const cbForEach = jest.fn();
-        const w = new Waterfall(arr);
-        w.forEach(cbForEach);
-        setTimeout(() => {
-            expect(cbForEach).toBeCalledTimes(4);
-            expect(cbForEach.mock.calls[0]).toMatchObject([10, 0]);
-            expect(cbForEach.mock.calls[1]).toMatchObject([11, 1]);
-            expect(cbForEach.mock.calls[2]).toMatchObject([12, 2]);
-            expect(cbForEach.mock.calls[3]).toMatchObject([13, 3]);
-            done();
-        }, 300);
-
-    });
-
     it('test each fn, should run 4 times on each iteration', (done) => {
         const cb = jest.fn();
         const w = new Waterfall(arr);
         w.each(cb);
         setTimeout(() => {
-            expect(cb.mock.calls[0]).toMatchObject([10, 0]);
-            expect(cb.mock.calls[1]).toMatchObject([11, 1]);
-            expect(cb.mock.calls[2]).toMatchObject([12, 2]);
-            expect(cb.mock.calls[3]).toMatchObject([13, 3]);
             expect(cb).toBeCalledTimes(4);
+            for (let i = 0; i < 4; i++) {
+                expect(cb.mock.calls[i][0]).toBe(10 + i);
+                expect(cb.mock.calls[i][1]).toBe(i);
+                expect(cb.mock.calls[i][2]).toBeInstanceOf(Function)
+            }
+            done();
+        }, 400);
+    });
+
+    it('test each fn with nextWith to pass arg to next, should return 10,20,40,80', (done) => {
+        const arrForNext = [() => asyncFn(10), asyncFn, asyncFn, asyncFn];
+        const w = new Waterfall(arrForNext);
+        const testFn = jest.fn((item, idx, nextWith) => nextWith(item * 2));
+        w.each(testFn);
+        setTimeout(() => {
+            expect(testFn).toBeCalledTimes(4);
+            expect(testFn.mock.calls[0][0]).toBe(10);
+            expect(testFn.mock.calls[1][0]).toBe(20);
+            expect(testFn.mock.calls[2][0]).toBe(40);
+            expect(testFn.mock.calls[3][0]).toBe(80);
+
             done();
         }, 400);
     });
