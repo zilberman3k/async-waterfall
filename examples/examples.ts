@@ -12,12 +12,20 @@ const timerFn = (id, p = 0) => {
 };
 
 let arr = [() => timerFn(10), () => timerFn(15), () => timerFn(15), () => timerFn(18)];
+let arrNext = [() => timerFn(30),timerFn,timerFn,timerFn];
 
 const w = new Waterfall(arr);
+const wNext = new Waterfall(arrNext);
 
 w.forEach(function (item,idx) {
    console.log(item,idx);
 }).each((it,id)=>{console.log(id,it)}).run((a,b,c)=>{console.log(a,b,c)});
+
+wNext.each((item,idx,nextWith)=>{
+    console.log(item+idx*3);
+    nextWith(item*4);
+});
+
 
 (async function() {
     for await (const item of w.iterator) {

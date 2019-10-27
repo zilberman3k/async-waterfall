@@ -64,8 +64,9 @@ where "for await" loop is available:
 
 #### w.forEach
 ````
- w.forEach(function(item,index){
+ w.forEach(function(item,index, nextWith /* optional */)){
     // invoked on each iteration resolved
+    // invoke e.g. nextWith('arguments to next iteration')
 });
 ````
 #### w.run
